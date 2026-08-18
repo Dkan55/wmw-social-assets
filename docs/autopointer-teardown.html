@@ -1,0 +1,627 @@
+<title>AutoPointer Teardown</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+
+<style>
+:root{
+  --ground:#EDEFF0; --surface:#FFFFFF; --surface-2:#F5F7F8; --surface-3:#E4E8EA;
+  --ink:#14181D; --ink-2:#4A535C; --ink-3:#78838D;
+  --rule:#D2D8DC; --rule-strong:#B4BDC4;
+  --accent:#0B3EA8; --accent-ink:#0B3EA8; --accent-soft:#DEE6F7;
+  --green:#1B6340; --green-soft:#DCEBE3;
+  --amber:#8E5300; --amber-soft:#F4E7D2;
+  --red:#9E2418; --red-soft:#F3DEDB;
+  --on-accent:#FFFFFF;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0F1216; --surface:#161A20; --surface-2:#1C212A; --surface-3:#242B35;
+    --ink:#E7EBEF; --ink-2:#A4AEB9; --ink-3:#78838E;
+    --rule:#2A313A; --rule-strong:#3A434E;
+    --accent:#7BA2F5; --accent-ink:#9BB9F8; --accent-soft:#1A2540;
+    --green:#5FC492; --green-soft:#15291F;
+    --amber:#DFA24C; --amber-soft:#2B2113;
+    --red:#EE8073; --red-soft:#2E1815;
+    --on-accent:#0F1216;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0F1216; --surface:#161A20; --surface-2:#1C212A; --surface-3:#242B35;
+  --ink:#E7EBEF; --ink-2:#A4AEB9; --ink-3:#78838E;
+  --rule:#2A313A; --rule-strong:#3A434E;
+  --accent:#7BA2F5; --accent-ink:#9BB9F8; --accent-soft:#1A2540;
+  --green:#5FC492; --green-soft:#15291F;
+  --amber:#DFA24C; --amber-soft:#2B2113;
+  --red:#EE8073; --red-soft:#2E1815;
+  --on-accent:#0F1216;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--ink);
+  font-family:"Source Serif 4",Georgia,"Times New Roman",serif;
+  font-size:17px;
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:78rem;margin:0 auto;padding:0 clamp(1.1rem,4vw,3rem) 6rem}
+
+/* ---------- masthead ---------- */
+.masthead{border-top:5px solid var(--accent);padding-top:2.4rem;margin-top:0}
+.eyebrow{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-3);
+}
+h1{
+  font-family:"Archivo",system-ui,sans-serif;
+  font-weight:700;letter-spacing:-.022em;line-height:1.02;
+  font-size:clamp(2.5rem,6.2vw,4.4rem);
+  margin:.5rem 0 0;text-wrap:balance;
+}
+.dek{
+  font-size:clamp(1.05rem,1.7vw,1.28rem);color:var(--ink-2);
+  max-width:56ch;margin:1.1rem 0 0;
+}
+.meta{
+  display:flex;flex-wrap:wrap;gap:0 2.2rem;
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:.72rem;color:var(--ink-3);
+  border-top:1px solid var(--rule);margin-top:2.2rem;padding-top:.8rem;
+}
+.meta b{color:var(--ink-2);font-weight:500}
+
+/* ---------- sections ---------- */
+section{margin-top:4.6rem}
+.sechead{
+  display:flex;align-items:baseline;gap:1rem;flex-wrap:wrap;
+  border-bottom:2px solid var(--ink);padding-bottom:.55rem;margin-bottom:1.9rem;
+}
+.mode{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;
+  padding:.25rem .5rem;border:1px solid var(--rule-strong);color:var(--ink-2);
+  background:var(--surface-2);white-space:nowrap;
+}
+.mode.befund{border-color:var(--accent);color:var(--accent-ink);background:var(--accent-soft)}
+.mode.plan{border-color:var(--green);color:var(--green);background:var(--green-soft)}
+h2{
+  font-family:"Archivo",system-ui,sans-serif;font-weight:600;letter-spacing:-.015em;
+  font-size:clamp(1.5rem,2.9vw,2.05rem);margin:0;line-height:1.15;text-wrap:balance;
+}
+h3{
+  font-family:"Archivo",system-ui,sans-serif;font-weight:600;letter-spacing:-.008em;
+  font-size:1.13rem;margin:2.4rem 0 .7rem;text-wrap:balance;
+}
+p{margin:0 0 1.05rem;max-width:68ch}
+.lead{font-size:1.1rem;color:var(--ink-2);max-width:64ch}
+ul,ol{max-width:68ch;padding-left:1.15rem;margin:0 0 1.05rem}
+li{margin-bottom:.5rem}
+a{color:var(--accent-ink);text-decoration-thickness:1px;text-underline-offset:2px}
+a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+strong{font-weight:600}
+code,.mono{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.86em}
+code{background:var(--surface-2);border:1px solid var(--rule);padding:.05em .32em;word-break:break-word}
+
+/* ---------- key findings ---------- */
+.keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:2.6rem}
+.key{background:var(--surface);padding:1.35rem 1.3rem}
+.key .n{
+  font-family:"Archivo",system-ui,sans-serif;font-weight:700;
+  font-size:1.85rem;letter-spacing:-.02em;line-height:1.1;display:block;
+  font-variant-numeric:tabular-nums;
+}
+.key .l{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.66rem;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);display:block;margin-bottom:.5rem}
+.key p{font-size:.9rem;color:var(--ink-2);margin:.5rem 0 0;max-width:none}
+
+/* ---------- evidence chips ---------- */
+.chip{
+  display:inline-block;font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:.62rem;letter-spacing:.11em;text-transform:uppercase;
+  padding:.18rem .45rem;border:1px solid;vertical-align:.12em;white-space:nowrap;
+}
+.chip.ok{color:var(--green);border-color:var(--green);background:var(--green-soft)}
+.chip.inf{color:var(--amber);border-color:var(--amber);background:var(--amber-soft)}
+.chip.warn{color:var(--red);border-color:var(--red);background:var(--red-soft)}
+
+/* ---------- reason list ---------- */
+.reasons{display:grid;gap:1px;background:var(--rule);border:1px solid var(--rule);margin:1.8rem 0}
+.reason{background:var(--surface);padding:1.2rem 1.3rem;display:grid;grid-template-columns:auto 1fr;gap:.5rem 1rem;align-items:start}
+.reason .rh{grid-column:2;font-family:"Archivo",system-ui,sans-serif;font-weight:600;font-size:1.02rem}
+.reason .rc{grid-column:1;grid-row:1}
+.reason p{grid-column:2;margin:0;font-size:.96rem;color:var(--ink-2)}
+
+/* ---------- tables ---------- */
+.tw{overflow-x:auto;border:1px solid var(--rule);margin:1.6rem 0;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.88rem;min-width:34rem}
+caption{
+  text-align:left;font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:.66rem;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);
+  padding:.85rem 1rem;border-bottom:1px solid var(--rule);background:var(--surface-2);
+}
+th{
+  font-family:"Archivo",system-ui,sans-serif;font-weight:600;font-size:.76rem;
+  letter-spacing:.03em;text-transform:uppercase;color:var(--ink-2);
+  text-align:left;padding:.7rem 1rem;border-bottom:1px solid var(--rule-strong);white-space:nowrap;
+}
+td{padding:.62rem 1rem;border-bottom:1px solid var(--rule);vertical-align:top}
+tbody tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.83rem;white-space:nowrap}
+td.k{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.8rem;color:var(--ink-2);white-space:nowrap}
+tbody tr:nth-child(even){background:var(--surface-2)}
+
+/* ---------- callout ---------- */
+.callout{
+  border:1px solid var(--rule);border-left:5px solid var(--accent);
+  background:var(--surface);padding:1.25rem 1.4rem;margin:1.9rem 0;
+}
+.callout.warn{border-left-color:var(--red)}
+.callout.good{border-left-color:var(--green)}
+.callout p:last-child{margin-bottom:0}
+.callout .ct{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.66rem;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);
+  display:block;margin-bottom:.5rem;
+}
+
+/* ---------- diagram ---------- */
+.figure{margin:2rem 0}
+.figscroll{overflow-x:auto;border:1px solid var(--rule);background:var(--surface);padding:1.4rem 1.2rem}
+.figcap{font-size:.85rem;color:var(--ink-3);margin-top:.7rem;max-width:68ch}
+svg .bx{fill:var(--surface-2);stroke:var(--rule-strong);stroke-width:1.5}
+svg .bx-a{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5}
+svg .bx-g{fill:var(--green-soft);stroke:var(--green);stroke-width:1.5}
+svg .t{fill:var(--ink);font-family:"Archivo",system-ui,sans-serif;font-size:14px;font-weight:600}
+svg .s{fill:var(--ink-3);font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10.5px}
+svg .ar{stroke:var(--rule-strong);stroke-width:1.5;fill:none}
+svg .arh{fill:var(--rule-strong)}
+
+/* ---------- roadmap ---------- */
+.phases{display:grid;gap:1px;background:var(--rule);border:1px solid var(--rule);margin:1.8rem 0}
+.phase{background:var(--surface);padding:1.3rem;display:grid;grid-template-columns:minmax(6.5rem,auto) 1fr;gap:.4rem 1.4rem}
+.phase .pn{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-ink);padding-top:.2rem}
+.phase .pt{font-family:"Archivo",system-ui,sans-serif;font-weight:600;font-size:1.05rem}
+.phase ul{margin:.45rem 0 0;font-size:.94rem;color:var(--ink-2);grid-column:2}
+.phase .pn2{grid-column:1;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.68rem;color:var(--ink-3)}
+
+details{border:1px solid var(--rule);background:var(--surface);padding:.9rem 1.15rem;margin-bottom:.6rem}
+summary{cursor:pointer;font-family:"Archivo",system-ui,sans-serif;font-weight:600;font-size:.98rem}
+details p{margin:.8rem 0 0;font-size:.95rem;color:var(--ink-2)}
+
+.srcs{font-size:.86rem;color:var(--ink-2)}
+.srcs li{margin-bottom:.35rem}
+
+@media (max-width:640px){
+  body{font-size:16px}
+  .reason{grid-template-columns:1fr}
+  .reason .rc,.reason .rh,.reason p{grid-column:1}
+  .phase{grid-template-columns:1fr}
+  .phase ul,.phase .pn2{grid-column:1}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <span class="eyebrow">Produkt-Teardown &middot; vitdev GmbH, Köln</span>
+  <h1>AutoPointer<br>Teardown</h1>
+  <p class="dek">Was die Software wirklich ist, warum es keinen Mac-Client gibt — und wie ein Nachbau aussehen müsste, der dieses Problem gar nicht erst bekommt.</p>
+  <div class="meta">
+    <span><b>Stand</b> 18.08.2026</span>
+    <span><b>Basis</b> autopointer.de, 14 Unterseiten, App-Stores, Installer-Analyse</span>
+    <span><b>Client-Version</b> 3.9.9198.0</span>
+  </div>
+</header>
+
+<div class="keys">
+  <div class="key">
+    <span class="l">Desktop-Plattformen</span>
+    <span class="n">1</span>
+    <p>Nur Windows x64. Kein <code>.dmg</code>, kein <code>.pkg</code>, kein Linux-Build — auf dem Server liegt ausschließlich die <code>.exe</code>.</p>
+  </div>
+  <div class="key">
+    <span class="l">Mobile Plattformen</span>
+    <span class="n">2</span>
+    <p>iOS und Android existieren und werden gepflegt (Android zuletzt 03.08.2026). Der Mac wurde also nicht aus Prinzip ausgelassen.</p>
+  </div>
+  <div class="key">
+    <span class="l">Listenpreis 12 Monate</span>
+    <span class="n">997&nbsp;€</span>
+    <p>Netto, Einzelplatz. Flex mit drei Plätzen: 2.297&nbsp;€. Keine Abo-Bindung, keine automatische Verlängerung.</p>
+  </div>
+  <div class="key">
+    <span class="l">Eigene Datenquellen</span>
+    <span class="n">0</span>
+    <p>Laut AGB stammen alle Daten „von externen Datenlieferanten“. Das ist der eigentliche Kern des Produkts — und die eigentliche Hürde beim Nachbau.</p>
+  </div>
+</div>
+
+<section>
+  <div class="sechead"><span class="mode befund">Befund</span><h2>Was das Produkt ist</h2></div>
+
+  <p class="lead">AutoPointer ist ein Echtzeit-Suchagent für Fahrzeuginserate, verkauft an gewerbliche Händler. Der Nutzer legt Filter an; sobald irgendwo in den angebundenen Börsen ein passendes Inserat neu erscheint oder sich im Preis ändert, taucht es sofort in der Software auf. Der Wert liegt nicht im Suchen — den Wert liefert der Vorsprung von ein paar Minuten beim Anruf.</p>
+
+  <p>Beworbene Funktionen: unbegrenzte Filter, alle Fahrzeugarten (Pkw, Lkw, Nutzfahrzeuge, Motorräder, Wohnmobile), Umkreissuche, „Parkplatz“ für gemerkte Fahrzeuge, Benachrichtigung bei Preisänderungen, integriertes Telefonsystem für den Direktanruf beim Anbieter und ein kostenpflichtiges Zusatzmodul „Telefonbuchabruf“. Auf der Partnerseite werden die Logos von <strong>mobile.de</strong>, <strong>AutoScout24</strong> und <strong>eBay</strong> gezeigt, dazu <strong>TeleLuft</strong>, <strong>ETNO</strong> und <strong>Auptis</strong> — die letzten drei passen zum Telefonie- und Rückwärtssuche-Teil.</p>
+
+  <div class="tw">
+    <table>
+      <caption>Preise laut Lizenzseite — Nettopreise zzgl. 19 % MwSt.</caption>
+      <thead><tr><th>Lizenz</th><th class="num">1 Monat</th><th class="num">3 Monate</th><th class="num">6 Monate</th><th class="num">12 Monate</th></tr></thead>
+      <tbody>
+        <tr><td>Premium Einzelplatz <span class="mono">(1 Arbeitsplatz)</span></td><td class="num">137 €</td><td class="num">327 €</td><td class="num">587 €</td><td class="num">997 €</td></tr>
+        <tr><td>Flex <span class="mono">(3 gleichzeitige Plätze)</span></td><td class="num">397 €</td><td class="num">827 €</td><td class="num">1.377 €</td><td class="num">2.297 €</td></tr>
+        <tr><td>Add-on Telefonbuchabruf</td><td class="num" colspan="4">12 – 80 € (Einzelplatz) &middot; 36 – 240 € (Flex), je nach Laufzeit</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Der Testzugang läuft über WhatsApp</h3>
+  <p>Bemerkenswert am Onboarding: Man gibt auf <code>/kostenlos-testen/</code> nur eine Telefonnummer an, bestätigt einen sechsstelligen Code und bekommt die Zugangsdaten per WhatsApp-Nachricht. Keine E-Mail, kein Formular mit Firmendaten. Die Testphase dauert sieben Tage, danach startet die Software schlicht nicht mehr. Eingeschränkt sind im Test nur zwei Dinge: die Anbieterseite und die Telefonie.</p>
+
+  <p>Die Lizenz ist ausdrücklich <em>arbeitsplatz</em>-, nicht gerätegebunden: Installieren darf man auf beliebig vielen PCs, gleichzeitig nutzen aber nur an einem Platz. Das spricht für eine serverseitige Sitzungszählung statt einer Hardware-Bindung — technisch die freundlichere Variante, und für einen Nachbau die richtige Vorlage.</p>
+</section>
+
+<section>
+  <div class="sechead"><span class="mode befund">Befund</span><h2>Die Seitenlandkarte</h2></div>
+
+  <p>Die Site ist ein WordPress mit 14 Seiten. Über die offene WordPress-REST-API (<code>/wp-json/wp/v2/pages</code>) lässt sich der vollständige Bestand samt Änderungsdaten auslesen — inklusive zweier Seiten, die in der Navigation nicht verlinkt sind.</p>
+
+  <div class="tw">
+    <table>
+      <caption>Vollständiger Seitenbestand mit letzter Änderung</caption>
+      <thead><tr><th>Seite</th><th class="k">Pfad</th><th class="num">Geändert</th></tr></thead>
+      <tbody>
+        <tr><td>Homepage</td><td class="k">/</td><td class="num">2025-10-28</td></tr>
+        <tr><td>Kostenlos testen</td><td class="k">/kostenlos-testen/</td><td class="num">2025-03-31</td></tr>
+        <tr><td>Lizenzen und Preise</td><td class="k">/lizenzen-preise-…/</td><td class="num">2024-04-29</td></tr>
+        <tr><td>Downloads</td><td class="k">/autopointer-download/</td><td class="num">2026-05-06</td></tr>
+        <tr><td>F.A.Q</td><td class="k">/f-a-q/</td><td class="num">2025-06-16</td></tr>
+        <tr><td>Unsere Partner</td><td class="k">/unsere-partnern/</td><td class="num">2025-01-20</td></tr>
+        <tr><td>AGB</td><td class="k">/agb/</td><td class="num">2025-07-23</td></tr>
+        <tr><td>Kontaktformular</td><td class="k">/kontaktformular/</td><td class="num">2024-10-08</td></tr>
+        <tr><td>Lizenzen und Preise Testversion <span class="chip inf">unverlinkt</span></td><td class="k">/bestellen_autopointertestversion-php/</td><td class="num">2024-03-14</td></tr>
+        <tr><td>Bestellformular</td><td class="k">/bestellformular/</td><td class="num">2023-11-16</td></tr>
+        <tr><td>Warenkorb</td><td class="k">/warenkorb/</td><td class="num">2023-11-16</td></tr>
+        <tr><td>Danke-Seite <span class="chip inf">unverlinkt</span></td><td class="k">/danke-seite/</td><td class="num">2023-11-16</td></tr>
+        <tr><td>Datenschutzbestimmungen</td><td class="k">/datenschutzbestimmungen/</td><td class="num">2023-11-16</td></tr>
+        <tr><td>Impressum</td><td class="k">/impressum/</td><td class="num">2023-11-16</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout warn">
+    <span class="ct">Widerspruch in den Systemanforderungen</span>
+    <p>Drei Seiten nennen drei verschiedene Mindestanforderungen: die Startseite „Windows 10 (64 Bit), 4 GB Arbeitsspeicher, Intel i5“, die FAQ „mind. 8 GB Arbeitsspeicher“, die Testseite „mind. 1 GB Arbeitsspeicher“. Die Testseite ist erkennbar die älteste Fassung. Einheitlich ist über alle drei nur eines: <strong>„Microsoft Windows als Betriebssystem“</strong>.</p>
+  </div>
+
+  <p>Nebenbefund: Die Datenschutzerklärung ist von 2023 und nennt Google Analytics, Facebook-, Twitter-, LinkedIn-, XING- und <em>Google&nbsp;+1</em>-Plugins. Google&nbsp;+1 gibt es seit 2019 nicht mehr. Zum Datenverhalten der eigentlichen Software — und die überträgt naturgemäß deutlich mehr als die Website — steht dort nichts. Wer nachbaut, sollte das besser machen; das ist bei einem Produkt, das Verkäufer-Telefonnummern verarbeitet, kein Formalie-Thema.</p>
+</section>
+
+<section>
+  <div class="sechead"><span class="mode befund">Befund</span><h2>Fingerabdruck des Windows-Clients</h2></div>
+
+  <p>Der Installer ist frei abrufbar unter <code>/Downloads/Installer/AutoPointerSetup.exe</code>. Ich habe ihn heruntergeladen und die Container-Struktur ausgewertet — nicht den Programmcode.</p>
+
+  <div class="tw">
+    <table>
+      <caption>Gemessen am Installer, abgerufen am 18.08.2026</caption>
+      <thead><tr><th>Merkmal</th><th>Wert</th></tr></thead>
+      <tbody>
+        <tr><td>Dateigröße</td><td class="k">58.378.800 Bytes (55,7 MiB)</td></tr>
+        <tr><td>Letzte Änderung auf dem Server</td><td class="k">2026-02-21</td></tr>
+        <tr><td>Binärformat</td><td class="k">PE32+ (x86-64), Subsystem Windows GUI</td></tr>
+        <tr><td>Produkt- / Dateiversion</td><td class="k">AutoPointer 3.9.9198.0</td></tr>
+        <tr><td>Herausgeber</td><td class="k">vitdev GmbH</td></tr>
+        <tr><td>Build-Zeitstempel</td><td class="k">2025-07-08</td></tr>
+        <tr><td>Compiler / Linker</td><td class="k">MSVC, Linker 14.39 → Visual Studio 2022</td></tr>
+        <tr><td>Paketierung</td><td class="k">InstallShield (Flexera), „Setup Player V31“, MSI-basiert</td></tr>
+        <tr><td>Geladene System-DLLs</td><td class="k">msi.dll, WININET, WINTRUST, CRYPT32, ISSetup.dll</td></tr>
+        <tr><td>Nutzlast (Overlay)</td><td class="k">57.253.424 Bytes, Header <code>ISSetupStream</code></td></tr>
+        <tr><td>Enthaltene Artefakte</td><td class="k">AutoPointer.msi, AutoPointer.isc</td></tr>
+        <tr><td>Sprach-Transforms</td><td class="k">1031 (de), 1033 (en), 1043 (nl), 1049 (ru)</td></tr>
+        <tr><td>Voraussetzung</td><td class="k">Windows Installer ≥ 4.5, Administratorrechte</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <span class="ct">Grenze dieser Analyse</span>
+    <p>Die Nutzlast ist vollständig komprimiert (Entropie ≈ 8,0 Bit/Byte) und ich habe sie nicht entpackt. Alle Aussagen zu Compiler und Paketierung beziehen sich damit auf den <em>Installer-Launcher</em>, nicht zwingend auf die Anwendung selbst. Welches GUI-Framework der Client verwendet, ist offen — belegt ist nur, dass er als natives MSI-Paket ausgeliefert wird und keine Runtime wie .NET, Electron oder Java mitbringt oder anfordert.</p>
+  </div>
+
+  <h3>Die Mobil-Apps erzählen eine andere Geschichte</h3>
+  <p>Beide Stores sind aktiv bespielt: iOS <span class="mono">3.2.7+36</span>, mindestens iOS 15.6, 75,9 MB, sieben Sprachen (DE/EN/FR/PL/RU/TR/UK); Android <code>de.vitdev.autopointer</code>, zuletzt am 03.08.2026 aktualisiert. Das Versionsschema <span class="mono">3.2.7+36</span> — Semver plus Build-Nummer nach einem Plus — ist genau die Konvention aus Flutters <code>pubspec.yaml</code>. <span class="chip inf">erschlossen</span> Sicher ist das nicht, aber es passt zu einer gemeinsamen Mobil-Codebasis für beide Stores.</p>
+
+  <p>Wichtig für die nächste Frage: <strong>Desktop und Mobile sind zwei getrennte Produktlinien</strong> mit getrennten Versionssträngen (3.9.9198 gegenüber 3.2.7). Der Desktop-Client ist nicht die gleiche Anwendung in einem anderen Gehäuse.</p>
+</section>
+
+<section>
+  <div class="sechead"><span class="mode">Analyse</span><h2>Warum es keinen Mac-Client gibt</h2></div>
+
+  <p class="lead">Kurz: weil nie einer gebaut wurde. Es gibt keine technische Sperre, die macOS ausschließt — es gibt eine Kette von Entscheidungen, die einen Mac-Port jedes Mal teurer gemacht haben, bis er sich nicht mehr lohnte. Ich trenne im Folgenden, was ich messen konnte, von dem, was ich daraus schließe.</p>
+
+  <div class="reasons">
+    <div class="reason">
+      <span class="rc"><span class="chip ok">belegt</span></span>
+      <span class="rh">Es existiert schlicht kein macOS-Build</span>
+      <p>Die Downloadseite bietet exakt drei Dinge an: die Windows-<code>.exe</code>, die iOS-App und die Android-App. Der einzige macOS-Download auf der ganzen Seite ist Splashtop SOS — das Fernwartungstool des Supports, nicht das Produkt. Direkte Anfragen an <code>AutoPointerSetup.dmg</code> und <code>.zip</code> im selben Verzeichnis liefern 404.</p>
+    </div>
+    <div class="reason">
+      <span class="rc"><span class="chip ok">belegt</span></span>
+      <span class="rh">Die Auslieferung hängt an Windows-Technik</span>
+      <p>Der Client wird als MSI-Paket über InstallShield installiert und setzt Windows Installer ≥ 4.5 plus Administratorrechte voraus. MSI und InstallShield existieren auf dem Mac nicht. Ein Mac-Port bräuchte eine vollständig zweite Auslieferungskette: <code>.pkg</code> oder <code>.dmg</code>, Apple Developer ID, Code-Signierung, Notarisierung, eigener Updater. Das ist unabhängig vom Anwendungscode nochmal ein eigenes Projekt.</p>
+    </div>
+    <div class="reason">
+      <span class="rc"><span class="chip ok">belegt</span></span>
+      <span class="rh">Es ist nativer x86-64-Code, kein Web-Wrapper</span>
+      <p>Die ausgelieferte Binärdatei ist ein natives PE32+-Programm für Intel/AMD-64. Wäre der Client eine gekapselte Weboberfläche (Electron, Tauri) gewesen, wäre ein Mac-Build fast ein Nebenprodukt gewesen. Ist er nicht — jede Zeile Oberflächen- und Systemcode müsste portiert werden, und auf Apple Silicon zusätzlich auf ARM64 übersetzt.</p>
+    </div>
+    <div class="reason">
+      <span class="rc"><span class="chip inf">erschlossen</span></span>
+      <span class="rh">Die Telefonie ist der wahrscheinliche Anker</span>
+      <p>„Integriertes Telefonsystem“ mit Ein-Klick-Anruf und dazu ein kostenpflichtiger Telefonbuchabruf — im Autohaus-Umfeld wird so etwas klassisch über TAPI beziehungsweise die CTI-Schnittstelle der TK-Anlage gelöst. Dafür gibt es unter macOS kein Gegenstück. Genau dieses Feature ist damit der teuerste Einzelposten eines Ports, und es ist zugleich das Feature, das die Software vom bloßen Suchagenten unterscheidet.</p>
+    </div>
+    <div class="reason">
+      <span class="rc"><span class="chip inf">erschlossen</span></span>
+      <span class="rh">Der Zielmarkt ist zu 100 % Windows</span>
+      <p>Autohaus-IT läuft auf Windows — die Händlermanagementsysteme, an denen der Arbeitsplatz hängt, gibt es praktisch ausschließlich dort. Ein Händler, der auf einem Mac arbeitet, ist im Zielmarkt eine Randerscheinung. Bei einem Produkt mit dieser Preisstruktur trägt sich ein zweiter Desktop-Client schlicht nicht. Das ist meiner Einschätzung nach der eigentliche Grund; alles darüber sind die Kosten, die diese Rechnung stützen.</p>
+    </div>
+  </div>
+
+  <div class="callout good">
+    <span class="ct">Was heute schon funktioniert</span>
+    <p>Auf Macs mit Apple-Silicon-Chip (M1 oder neuer, macOS 12.5+) lässt sich die <strong>iOS-App direkt aus dem Mac App Store installieren</strong> — Apple führt sie dort mit dem Hinweis „Nicht für macOS verifiziert“, das heißt: lauffähig, aber vom Hersteller nicht getestet. Filter, Push-Benachrichtigungen und Detailansicht hat man damit. Was fehlt, ist alles, was den Desktop-Client ausmacht: die Anbieterseite und die Telefonie. Für den vollen Funktionsumfang bleibt heute nur Windows in Parallels, einer VM oder auf einem Terminalserver.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><span class="mode">Analyse</span><h2>Der eigentlich schwere Teil ist nicht die Software</h2></div>
+
+  <p class="lead">Die Oberfläche eines solchen Programms baut ein gutes Team in wenigen Wochen. Der Grund, warum es trotzdem nur eine Handvoll Anbieter in diesem Markt gibt, steht in einem einzigen Satz der AGB.</p>
+
+  <div class="callout">
+    <span class="ct">AGB, vitdev GmbH</span>
+    <p>„Die in der Software der vitdev GmbH eingespeisten und verarbeiteten Daten stammen von <strong>externen Datenlieferanten</strong>.“ — dazu: keine Haftung für Inhalt, Vollständigkeit oder Ausfälle auf Lieferantenseite, zugesagt werden 99 % Serververfügbarkeit.</p>
+  </div>
+
+  <p>AutoPointer betreibt also keine eigene Erhebung, sondern kauft Daten ein und schiebt das Risiko vertraglich weiter. Wer nachbaut, muss genau diese Frage zuerst beantworten — nicht die nach dem Framework. Die Lage pro Quelle:</p>
+
+  <div class="tw">
+    <table>
+      <caption>Zugangswege zu den relevanten Börsen</caption>
+      <thead><tr><th>Quelle</th><th>Offizieller Weg</th><th>Bewertung</th></tr></thead>
+      <tbody>
+        <tr><td>eBay.de (Motors)</td><td>Browse-API im eBay-Developer-Programm</td><td><span class="chip ok">frei zugänglich</span> Sofort nutzbar, kostenlos, dokumentiert. Der richtige Kanal für den ersten Prototyp.</td></tr>
+        <tr><td>mobile.de</td><td>Search-API nur über Partner-/Händlervertrag</td><td><span class="chip inf">vertraglich</span> Technisch vorhanden, Zugang wird verhandelt und ist an Konditionen gebunden.</td></tr>
+        <tr><td>AutoScout24</td><td>Partner-/Dealer-Schnittstellen</td><td><span class="chip inf">vertraglich</span> Wie oben: der Weg führt über den Vertrieb, nicht über die Doku.</td></tr>
+        <tr><td>Kleinanzeigen.de</td><td>kein öffentliches API-Programm</td><td><span class="chip warn">problematisch</span> Genau die Quelle mit den besten Privatverkäufer-Angeboten ist die verschlossenste.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Die rechtliche Seite gehört an den Anfang, nicht ans Ende</h3>
+  <p>Systematisches Auslesen fremder Inseratsbestände ist in Deutschland nicht nur eine AGB-Frage. Der scharfe Hebel ist das <strong>Datenbankherstellerrecht nach §§ 87a ff. UrhG</strong>: Betreiber von Fahrzeugbörsen investieren erheblich in ihre Datenbank und können gegen die Entnahme wesentlicher Teile vorgehen — auch gegen die wiederholte Entnahme unwesentlicher Teile, und genau das ist ein Suchagent, der im Minutentakt pollt. Dazu kommen die Nutzungsbedingungen der Portale, wettbewerbsrechtliche Aspekte und die DSGVO, sobald Kontaktdaten von Privatverkäufern gespeichert werden.</p>
+
+  <p>Der Telefonbuchabruf verdient dabei besondere Aufmerksamkeit: Eine Rückwärtssuche von der Nummer zum Namen ist in Deutschland zulässig, aber an Bedingungen geknüpft — Teilnehmer können der Aufnahme in Rückwärtssuchverzeichnisse widersprechen. Wer dieses Feature nachbaut, braucht dafür einen lizenzierten Verzeichnisanbieter und keine selbstgebaute Datensammlung.</p>
+
+  <div class="callout warn">
+    <span class="ct">Empfehlung</span>
+    <p>Vor der ersten Zeile Produktcode: eine anwaltliche Einschätzung zum Datenbankherstellerrecht für das konkrete Vorhaben, und parallel Gespräche mit mobile.de und AutoScout24 über einen Partnerzugang. Baut man das Produkt zuerst und klärt die Quellen später, hat man am Ende eine gute Software ohne Daten — oder eine Abmahnung. Der eBay-Weg ist so wertvoll, weil er beides entkoppelt: damit lässt sich die Technik vollständig beweisen, während die Verträge laufen.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><span class="mode plan">Plan</span><h2>Referenzarchitektur für den Nachbau</h2></div>
+
+  <p class="lead">Ein Suchagent ist keine Suchmaschine. Der Unterschied ist die Richtung: Nicht der Nutzer stellt eine Anfrage an den Bestand, sondern jedes neue Inserat wird gegen alle gespeicherten Filter geprüft. Diese Umkehrung ist die zentrale Entwurfsentscheidung — sie entscheidet darüber, ob das System bei tausend Nutzern mit je fünfzig Filtern noch unter einer Minute liefert.</p>
+
+  <div class="figure">
+    <div class="figscroll">
+      <svg viewBox="0 0 1060 288" width="1060" role="img" aria-label="Datenfluss von den Börsen über Connectoren, Normalisierung, Ereignisstrom und Filter-Matching bis zu den Clients">
+        <defs>
+          <marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0,0 L8,4 L0,8 z" class="arh"/>
+          </marker>
+        </defs>
+
+        <!-- column 1: sources -->
+        <text x="10" y="20" class="s">QUELLEN</text>
+        <rect x="10" y="30" width="140" height="42" class="bx"/>
+        <text x="24" y="49" class="t">eBay API</text><text x="24" y="63" class="s">offiziell, frei</text>
+        <rect x="10" y="82" width="140" height="42" class="bx"/>
+        <text x="24" y="101" class="t">mobile.de</text><text x="24" y="115" class="s">Partnervertrag</text>
+        <rect x="10" y="134" width="140" height="42" class="bx"/>
+        <text x="24" y="153" class="t">AutoScout24</text><text x="24" y="167" class="s">Partnervertrag</text>
+        <rect x="10" y="186" width="140" height="42" class="bx"/>
+        <text x="24" y="205" class="t">weitere</text><text x="24" y="219" class="s">EU-Börsen</text>
+
+        <path d="M150 129 H182" class="ar" marker-end="url(#ah)"/>
+
+        <!-- column 2 -->
+        <text x="190" y="20" class="s">INGEST</text>
+        <rect x="190" y="82" width="140" height="94" class="bx-a"/>
+        <text x="204" y="112" class="t">Connectoren</text>
+        <text x="204" y="132" class="s">ein Worker je</text>
+        <text x="204" y="146" class="s">Quelle, Poll ≤ 30 s</text>
+        <text x="204" y="160" class="s">Ratelimit, Retry</text>
+
+        <path d="M330 129 H362" class="ar" marker-end="url(#ah)"/>
+
+        <!-- column 3 -->
+        <text x="370" y="20" class="s">VEREINHEITLICHEN</text>
+        <rect x="370" y="82" width="140" height="94" class="bx"/>
+        <text x="384" y="112" class="t">Normalisieren</text>
+        <text x="384" y="132" class="s">ein Schema für</text>
+        <text x="384" y="146" class="s">alle Börsen</text>
+        <text x="384" y="160" class="s">+ Dublettenabgleich</text>
+
+        <path d="M510 129 H542" class="ar" marker-end="url(#ah)"/>
+
+        <!-- column 4 -->
+        <text x="550" y="20" class="s">EREIGNISSE</text>
+        <rect x="550" y="82" width="140" height="94" class="bx"/>
+        <text x="564" y="112" class="t">Ereignisstrom</text>
+        <text x="564" y="132" class="s">neu</text>
+        <text x="564" y="146" class="s">Preis geändert</text>
+        <text x="564" y="160" class="s">verschwunden</text>
+
+        <path d="M690 129 H722" class="ar" marker-end="url(#ah)"/>
+
+        <!-- column 5 -->
+        <text x="730" y="20" class="s">ZUORDNEN</text>
+        <rect x="730" y="82" width="140" height="94" class="bx-a"/>
+        <text x="744" y="112" class="t">Filter-Matching</text>
+        <text x="744" y="132" class="s">gespeicherte Filter</text>
+        <text x="744" y="146" class="s">als Percolate-Query</text>
+        <text x="744" y="160" class="s">ein Durchlauf</text>
+
+        <path d="M870 129 H902" class="ar" marker-end="url(#ah)"/>
+
+        <!-- column 6 -->
+        <text x="910" y="20" class="s">ZUSTELLUNG</text>
+        <rect x="910" y="56" width="140" height="42" class="bx-g"/>
+        <text x="924" y="75" class="t">Web + Desktop</text><text x="924" y="89" class="s">WebSocket</text>
+        <rect x="910" y="108" width="140" height="42" class="bx-g"/>
+        <text x="924" y="127" class="t">Mobil</text><text x="924" y="141" class="s">APNs / FCM</text>
+        <rect x="910" y="160" width="140" height="42" class="bx-g"/>
+        <text x="924" y="179" class="t">Telefonie</text><text x="924" y="193" class="s">WebRTC / SIP</text>
+
+        <!-- latency bar -->
+        <line x1="10" y1="252" x2="1050" y2="252" class="ar"/>
+        <text x="10" y="272" class="s">LATENZBUDGET — Publikation bis Push-Zustellung: Ziel unter 60 s. Das ist das gesamte Produktversprechen.</text>
+      </svg>
+    </div>
+    <p class="figcap">Der Kern liegt in der fünften Spalte: Filter werden nicht ausgeführt, sondern vorgehalten und angewendet.</p>
+  </div>
+
+  <h3>Die drei Stellen, an denen so ein System scheitert</h3>
+
+  <details open>
+    <summary>Dublettenabgleich über Börsen hinweg</summary>
+    <p>Dasselbe Fahrzeug steht gleichzeitig auf mobile.de, AutoScout24 und Kleinanzeigen — und der Händler will es einmal sehen, nicht dreimal. Wo eine Fahrgestellnummer vorliegt, ist der Fall trivial. Sonst braucht es einen Fingerabdruck aus Marke, Modell, Erstzulassung, Laufleistung, Leistung und Preisband, ergänzt um einen Wahrnehmungs-Hash der ersten Bilder und die Anbieterkennung. Diese Schicht unterschätzt man reflexhaft; sie entscheidet darüber, ob das Produkt sich brauchbar anfühlt.</p>
+  </details>
+
+  <details>
+    <summary>Filter-Matching in umgekehrter Richtung</summary>
+    <p>Der naive Weg — alle gespeicherten Filter im Minutentakt als Suchanfragen gegen den Bestand laufen lassen — wächst mit Nutzerzahl mal Filteranzahl mal Taktfrequenz und ist bei ein paar hundert Kunden erledigt. Der richtige Weg speichert die Filter als Suchanfragen im Index und schickt jedes eingehende Inserat einmal hindurch (in OpenSearch/Elasticsearch heißt das Percolate-Query). Der Aufwand wächst dann nur noch mit der Zahl neuer Inserate — und die ist eine Eigenschaft des Marktes, nicht des eigenen Wachstums.</p>
+  </details>
+
+  <details>
+    <summary>Ehrliche Latenz statt beworbener Echtzeit</summary>
+    <p>„Echtzeit“ ist Marketing. Real ist die Kette aus Abfrageintervall, Verarbeitung und Zustellung. Wenn eine Quelle nur alle 60 Sekunden abgefragt werden darf, ist die mittlere Verzögerung 30 Sekunden plus Verarbeitung — mehr geht nicht, egal wie gut der Rest ist. Diese Zahl gehört gemessen, überwacht und dem Kunden gegenüber offen benannt. Sie ist das Produkt.</p>
+  </details>
+
+  <p>Als konkreter Stack trägt das: PostgreSQL für den Bestand und die Kundendaten, OpenSearch für Suche und Percolate-Matching, Redis für Dublettenprüfung und Ratelimits, ein Objektspeicher für Bild-Vorschauen und Hashes, dazu eine Warteschlange zwischen Ingest und Matching, damit ein Ausfall einer Börse den Rest nicht mitreißt.</p>
+</section>
+
+<section>
+  <div class="sechead"><span class="mode plan">Plan</span><h2>Plattformneutral vom ersten Tag an</h2></div>
+
+  <p class="lead">Aus dem Mac-Befund folgt die wichtigste Bauentscheidung: Windows-Only ist kein Zustand, in den man gerät, sondern einer, den man sich durch drei Festlegungen einhandelt. Alle drei lassen sich vermeiden, ohne dass es mehr kostet.</p>
+
+  <div class="tw">
+    <table>
+      <caption>Was AutoPointer festgelegt hat und was stattdessen zu wählen wäre</caption>
+      <thead><tr><th>Baustein</th><th>Dort</th><th>Im Nachbau</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Oberfläche</strong></td>
+          <td>nativer Windows-Client, MSI-verpackt</td>
+          <td>Eine Codebasis für alles. Da die Mobil-Apps ohnehin gebraucht werden, ist <strong>Flutter</strong> naheliegend: Windows, macOS, Linux, iOS, Android und Web aus einem Projekt. Alternative, wenn das Team aus der Webentwicklung kommt: Weboberfläche plus <strong>Tauri</strong>-Hülle für den Desktop.</td>
+        </tr>
+        <tr>
+          <td><strong>Telefonie</strong></td>
+          <td>vermutlich TAPI/CTI — an Windows gebunden</td>
+          <td>Ausgehende Anrufe über einen <strong>SIP-Trunk mit WebRTC</strong> (sipgate.io, Placetel, Twilio). Läuft im Browser wie auf jedem Desktop, keine lokale Hardware, keine Plattformabhängigkeit — und nebenbei Gesprächsprotokolle im CRM.</td>
+        </tr>
+        <tr>
+          <td><strong>Lizenzierung</strong></td>
+          <td>arbeitsplatzgebunden, sieben Tage Test</td>
+          <td>Genau so, aber sauber serverseitig: <strong>gleichzeitige Sitzungen</strong> als Zählgröße, kein Hardware-Fingerabdruck. Damit funktioniert derselbe Zugang auf PC, Mac und Telefon — was das Flex-Modell erst wirklich attraktiv macht.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>Der Nebeneffekt ist der eigentliche Wettbewerbsvorteil: Ein Nachbau, der im Browser läuft, braucht überhaupt keine Installation, keine Administratorrechte und keinen Support-Termin für die Einrichtung — und ist damit auf jedem Gerät im Autohaus sofort nutzbar, einschließlich der Macs, für die es heute keine Lösung gibt.</p>
+</section>
+
+<section>
+  <div class="sechead"><span class="mode plan">Plan</span><h2>Reihenfolge</h2></div>
+
+  <p>Die Phasen sind so geschnitten, dass jede einzelne für sich beweist, ob es weitergeht — und dass die teuerste Unbekannte, der Datenzugang, ganz vorne steht.</p>
+
+  <div class="phases">
+    <div class="phase">
+      <span class="pn">Phase 0</span>
+      <div><span class="pt">Zugang klären, Latenz beweisen</span></div>
+      <span class="pn2">2 – 4 Wochen</span>
+      <ul>
+        <li>Anwaltliche Einschätzung zum Datenbankherstellerrecht für das konkrete Vorhaben</li>
+        <li>Erstkontakt mit mobile.de und AutoScout24 zum Partnerzugang — Vorlaufzeit einplanen</li>
+        <li>Prototyp auf der eBay-Browse-API: ein Kanal, ein Filter, eine Push-Nachricht aufs Telefon</li>
+        <li>Messgröße: gemessene Zeit von Inseratsveröffentlichung bis Push. Nur diese Zahl zählt.</li>
+      </ul>
+    </div>
+    <div class="phase">
+      <span class="pn">Phase 1</span>
+      <div><span class="pt">Die Maschine dahinter</span></div>
+      <span class="pn2">6 – 10 Wochen</span>
+      <ul>
+        <li>Einheitliches Fahrzeugschema, Normalisierung, Dublettenabgleich</li>
+        <li>Ereignisstrom mit „neu“, „Preis geändert“, „verschwunden“ und vollständiger Preishistorie</li>
+        <li>Filter-Matching über Percolate-Queries statt wiederholter Suchanfragen</li>
+        <li>Weboberfläche mit Filterverwaltung, Trefferliste, Parkplatz und Live-Aktualisierung</li>
+      </ul>
+    </div>
+    <div class="phase">
+      <span class="pn">Phase 2</span>
+      <div><span class="pt">Verkaufsfähig machen</span></div>
+      <span class="pn2">6 – 8 Wochen</span>
+      <ul>
+        <li>Desktop-Hüllen für Windows <em>und</em> macOS aus derselben Codebasis, mit Signierung und Notarisierung</li>
+        <li>Mobil-Apps für iOS und Android, Push über APNs und FCM</li>
+        <li>Sitzungsbasierte Lizenzierung, Testzugang, Abrechnung, Rechnungen</li>
+        <li>Zweite Datenquelle über den in Phase 0 angestoßenen Vertrag</li>
+      </ul>
+    </div>
+    <div class="phase">
+      <span class="pn">Phase 3</span>
+      <div><span class="pt">Der Vorsprung</span></div>
+      <span class="pn2">laufend</span>
+      <ul>
+        <li>Telefonie über SIP-Trunk mit Gesprächsprotokoll und Wiedervorlage</li>
+        <li>Preisbewertung: Marktwert des Fahrzeugs gegen den Inseratspreis, Sortierung nach Abweichung</li>
+        <li>Team-Funktionen — wer hat welches Fahrzeug schon angerufen</li>
+        <li>Umkreissuche, Filter-Import/-Export, weitere europäische Börsen</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><span class="mode">Analyse</span><h2>Was offen bleibt</h2></div>
+  <p>Damit die Grenzen dieser Untersuchung klar sind — diese vier Punkte sind ungeklärt und ließen sich mit vertretbarem Aufwand nachziehen:</p>
+  <ul>
+    <li><strong>Das GUI-Framework des Windows-Clients.</strong> Die Installer-Nutzlast ist komprimiert und wurde nicht entpackt. Eine Installation in einer Windows-VM würde das in Minuten beantworten — und nebenbei zeigen, mit welchen Servern die Anwendung spricht.</li>
+    <li><strong>Wer die „externen Datenlieferanten“ sind.</strong> Auf der Partnerseite steht neben den bekannten Börsen der Name <em>Auptis</em>; ob das der Datenlieferant ist, konnte ich nicht bestätigen.</li>
+    <li><strong>Ob die Mobil-Apps tatsächlich Flutter sind.</strong> Das Versionsschema legt es nahe, mehr nicht.</li>
+    <li><strong>Die reale Latenz.</strong> Das Kernversprechen ist unbelegt. Sieben Tage Test kosten nichts — eine Woche Messung gegen einen bekannten Inseratszeitpunkt liefert die Zahl, an der sich ein Nachbau messen lassen muss.</li>
+  </ul>
+</section>
+
+<section>
+  <div class="sechead"><span class="mode befund">Quellen</span><h2>Belege</h2></div>
+  <ul class="srcs">
+    <li><a href="https://www.autopointer.de/">autopointer.de — Startseite</a>, <a href="https://www.autopointer.de/f-a-q/">FAQ</a>, <a href="https://www.autopointer.de/lizenzen-preise-autopointer-einzelplatzlizenz-autopointer-flex/">Lizenzen und Preise</a>, <a href="https://www.autopointer.de/autopointer-download/">Downloads</a>, <a href="https://www.autopointer.de/kostenlos-testen/">Kostenlos testen</a>, <a href="https://www.autopointer.de/agb/">AGB</a>, <a href="https://www.autopointer.de/unsere-partnern/">Partner</a>, <a href="https://www.autopointer.de/datenschutzbestimmungen/">Datenschutz</a></li>
+    <li>Seitenbestand über die offene WordPress-REST-API: <code>/wp-json/wp/v2/pages</code></li>
+    <li>Installer <code>/Downloads/Installer/AutoPointerSetup.exe</code>, abgerufen und strukturell ausgewertet am 18.08.2026</li>
+    <li><a href="https://apps.apple.com/de/app/autopointer/id794936383">AutoPointer im App Store</a> &middot; <a href="https://play.google.com/store/apps/details?id=de.vitdev.autopointer">AutoPointer bei Google Play</a></li>
+  </ul>
+</section>
+
+</div>
