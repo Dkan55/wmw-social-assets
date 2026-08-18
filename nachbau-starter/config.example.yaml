@@ -1,0 +1,38 @@
+# Kopiere diese Datei nach config.yaml und trage deine Keys/Suchen ein.
+
+poll_interval_seconds: 120       # wie oft alle Suchen abgefragt werden
+database: listings.db            # SQLite-Datei fuer den Zustand
+
+providers:
+  # Aggregator fuer Kleinanzeigen + mobile.de + AutoScout24.
+  # Key holen: https://my.carapis.com
+  carapis:
+    api_key: "DEIN_CARAPIS_KEY"
+
+  # Offizielle eBay Browse API (frei). OAuth-App-Token:
+  # https://developer.ebay.com/api-docs/static/oauth-client-credentials-grant.html
+  ebay:
+    oauth_token: "DEIN_EBAY_APP_TOKEN"
+    marketplace: "EBAY_DE"
+
+notify:
+  webhook_url: ""                # optional: POST-Ziel fuer jeden Treffer (z.B. dein Backend)
+
+searches:
+  - name: "BMW 3er unter 15k, privat"
+    sources: ["kleinanzeigen", "mobile", "ebay"]
+    query:
+      make: "BMW"
+      model: "3er"
+      price_max: 15000
+      year_min: 2015
+      mileage_max: 150000
+      seller_type: "private"
+
+  - name: "VW T6 Transporter, Haendler egal"
+    sources: ["kleinanzeigen", "mobile", "autoscout"]
+    query:
+      make: "Volkswagen"
+      model: "T6"
+      price_max: 30000
+      mileage_max: 200000
